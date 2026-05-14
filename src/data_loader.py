@@ -2,57 +2,26 @@ import pandas as pd
 import os
 
 # ----------------------------
-# DOWNLOADS PATH (YOUR SETUP)
+# PROJECT DATA FOLDER
 # ----------------------------
-DATA_DIR = r"C:\Users\MYPC\Downloads"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# ----------------------------
-# FIND FILE AUTOMATICALLY
-# ----------------------------
-def find_file(name):
-    """
-    Tries multiple formats:
-    Users
-    Users.csv
-    Users.csv.csv
-    """
-    possible_names = [
-        name,
-        f"{name}.csv",
-        f"{name}.csv.csv"
-    ]
-
-    for file in possible_names:
-        path = os.path.join(DATA_DIR, file)
-        if os.path.exists(path):
-            return path
-
-    return None
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
 # ----------------------------
-# SAFE CSV LOADER
+# LOAD CSV
 # ----------------------------
-def load_csv(name):
-    path = find_file(name)
+def load_csv(filename):
 
-    if path is None:
-        raise FileNotFoundError(
-            f"❌ File '{name}' not found in Downloads folder."
-        )
+    path = os.path.join(DATA_DIR, filename)
 
-    try:
-        df = pd.read_csv(path, encoding="utf-8-sig", engine="python")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File not found: {filename}")
 
-        # fallback if bad formatting
-        if df.shape[1] == 1:
-            df = pd.read_csv(path, encoding="utf-8-sig", sep=None, engine="python")
+    df = pd.read_csv(path, encoding="utf-8-sig")
 
-        # clean column names
-        df.columns = df.columns.astype(str).str.strip()
+    # clean column names
+    df.columns = df.columns.astype(str).str.strip()
 
-        return df
-
-    except Exception as e:
-        raise Exception(f"Error loading {path}: {e}")
+    return df
